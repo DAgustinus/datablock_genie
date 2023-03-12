@@ -18,7 +18,7 @@ class FakerGen:
     def __init__(self):
         self.faker = Faker()
 
-    def get_data(self, data_category: str, column_args: dict = None):
+    def get_data(self, data_category: Literal["datetime", "float", "integer", "name"], column_args: dict = None):
         if data_category == DATETIME:
             datetime_range = column_args["datetime_range"] if column_args and "datetime_range" in column_args else None
             datetime_format = column_args["datetime_format"] if column_args and "datetime_format" in column_args else None
@@ -34,7 +34,7 @@ class FakerGen:
             full_name = column_args["full_name"] if column_args and "full_name" in column_args else True
             return self.generate_name(name_type=name_type, full_name=full_name)
         else:
-            raise ValueError(f"Please specify data_category arg.")
+            raise ValueError(f'Please specify data_category arg (Literal["datetime", "float", "integer", "name"])')
 
     def generate_name(self, name_type: Literal["first", "last", None] = None, full_name: bool = True) -> str:
         name = self.faker.name()
@@ -69,6 +69,9 @@ class FakerGen:
             else:
                 return gen_dt
 
+    def _generate_dt(self) -> datetime:
+        return datetime.strptime(self.faker.date() + " " + self.faker.time(), "%Y-%m-%d %H:%M:%S")
+
     @staticmethod
     def generate_int(int_range: Optional[List[int]] = None) -> int:
         if int_range and (len(int_range) != 2 or sorted(int_range) != int_range or None in int_range):
@@ -90,9 +93,6 @@ class FakerGen:
         min_range = float(INT_MIN) if not float_range else float_range[0]
 
         return random.uniform(min_range, max_range)
-
-    def _generate_dt(self) -> datetime:
-        return datetime.strptime(self.faker.date() + " " + self.faker.time(), "%Y-%m-%d %H:%M:%S")
 
     @staticmethod
     def _format_dt(dt: datetime, dt_format: str) -> str:
