@@ -9,6 +9,11 @@ from typing import List, Literal, Union
 
 class DataBlockGenie:
     def __init__(self, row_counts: int = 100, log_level: Literal["info", "warning", "debug"] = "info"):
+        """
+        DataBlockGenie generates Dataframes easily so you don't have to create a dummy configuration for a DF
+        :param row_counts: the amount of rows will be generated
+        :param log_level: log level ["info", "warning", "debug"]
+        """
         self.row_counts = row_counts
         self.data_template = DataTemplate(amount=self.row_counts)
         self.logger = get_logger(log_level)
@@ -24,9 +29,19 @@ class DataBlockGenie:
         return f"Dataframe row counts: {self.row_counts}.\nColumns: {all_columns}"
 
     def set_row_counts(self, row_count: int) -> None:
+        """
+        Sets row counts
+        :param row_count: Set the amount of rows you'd like to have
+        :return: None
+        """
         self.row_counts = row_count if row_count != self.row_counts else self.row_counts
 
     def create_spark_df(self, spark_session: SparkSession) -> DataFrame:
+        """
+        Generate Spark Dataframe
+        :param spark_session: Sparksession
+        :return: Spark.Dataframe
+        """
         rows, columns = self._generate_data()
         df = spark_session.createDataFrame(rows, columns)
         self.logger.debug("Spark DF has been created")
@@ -34,20 +49,32 @@ class DataBlockGenie:
         return df
     
     def create_pandas_df(self) -> pd.DataFrame:
+        """
+        Generate Pandas Dataframe
+        :return: pd.Dataframe
+        """
         rows, columns = self._generate_data()
         df = pd.DataFrame(data=rows, columns=columns)
         self.logger.debug("Pandas DF has been created")
 
         return df
     
-    def add_columns(self, cols: Union[List[DataColumn], DataColumn]) -> None:
-        if isinstance(cols, List):
-            for col in cols:
-                self.data_template.columns[col.column_name] = col
-        else:
-            self.data_template.columns[cols.column_name] = cols
+    def add_column(self, name: str, category: Literal["datetime", "float", "integer", "name"], **args: str) -> None:
+        """
+        Add column to object
+        :param name: Column Name
+        :param category: Column category to be generated ["datetime", "float", "integer", "name"]
+        :param args: keyword arguments to pass on to data generator
+        :return: None
+        """
+        self.data_template.columns[name] = DataColumn(name, category, args)
 
     def remove_columns(self, cols: Union[List[str], str]) -> None:
+        """
+        This method accepts list of column names or a single column represented by a string
+        :param cols: Name of columns as a list of string or a single string
+        :return: None
+        """
         temp_cols = self.data_template.columns
         if isinstance(cols, List):
             for col in cols:
@@ -64,6 +91,10 @@ class DataBlockGenie:
                 self.logger.warning(f'Column "{cols}" was not found')
 
     def _generate_data(self) -> tuple:
+        """
+        This method generates the initial data that will be plugged into pd.Dataframe or spark_session.createDataFrame
+        :return: (rows, column_names)
+        """
         amount = self.data_template.amount
 
         column_names = [column_name for column_name in self.data_template.columns.keys()]
