@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "datablock-genie"
+version = "0.1.0"
+description = "Datablock Genie is a Dataframe generator which can create a Dataframe fofor Pyspark or Pandas library."
+authors = ["Dan Pesiwarissa <dan.pesiwarissa@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "datablock_genie"}]
+
+[tool.poetry.dependencies]
+python = "^3.7.5"
+pandas = "^1.0.1"
+pyspark = "^3.0.0"
+faker = "^12.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
