@@ -1,3 +1,4 @@
+import calendar
 import random
 
 from faker import Faker
@@ -19,6 +20,12 @@ class FakerGen:
         self.faker = Faker()
 
     def get_data(self, data_category: Literal["datetime", "float", "integer", "name"], column_args: dict = None):
+        """
+        This method runs the appropriate value generator for each of the columns
+        :param data_category: Arg which will be used to generate data ["datetime", "float", "integer", "name"]
+        :param column_args: Additional arguments for each of the generator
+        :return: generated data value
+        """
         if data_category == DATETIME:
             datetime_range = column_args["datetime_range"] if column_args and "datetime_range" in column_args else None
             datetime_format = column_args["datetime_format"] if column_args and "datetime_format" in column_args else None
@@ -37,6 +44,13 @@ class FakerGen:
             raise ValueError(f'Please specify data_category arg (Literal["datetime", "float", "integer", "name"])')
 
     def generate_name(self, name_type: Literal["first", "last", None] = None, full_name: bool = True) -> str:
+        """
+        Generate name
+        :param name_type: Selects the type of name from full name to each of name portion ["first", "last", None]
+        :param full_name: Default set to True but will be override if name type is selected
+        :return: name value
+        """
+
         name = self.faker.name()
 
         if (name_type and full_name) or name_type:
@@ -48,32 +62,40 @@ class FakerGen:
             self, datetime_range: Optional[List[datetime]] = None,
             datetime_format: str = None
     ) -> Union[datetime, str]:
+        """
+        Generate datetime object or date/time string which can be formatted as needed
+        :param datetime_range: List of date range [Min datetime, Max datetime]
+        :param datetime_format: Format type of how the date would be in DF
+        :return: Datetime string value
+        """
         if datetime_range and (sorted(datetime_range) != datetime_range or len(datetime_range) != 2):
             raise ValueError(f"Please double check datetime_range. Ensure that you only have 2 in the list and they are"
                              f"in ascending order.")
 
         if datetime_range:
-            min_dt = datetime_range[0]
-            max_dt = datetime_range[1]
-            while True:
-                gen_dt = self._generate_dt()
-                if gen_dt >= min_dt or max_dt <= gen_dt:
-                    if datetime_format:
-                        return self._format_dt(gen_dt, datetime_format)
-                    else:
-                        return gen_dt
-        else:
-            gen_dt = self._generate_dt()
+            min_dt = calendar.timegm(datetime_range[0].timetuple())
+            max_dt = calendar.timegm(datetime_range[1].timetuple())
+
+            gen_dt = datetime.utcfromtimestamp(random.randint(min_dt, max_dt))
             if datetime_format:
                 return self._format_dt(gen_dt, datetime_format)
             else:
                 return gen_dt
 
-    def _generate_dt(self) -> datetime:
-        return datetime.strptime(self.faker.date() + " " + self.faker.time(), "%Y-%m-%d %H:%M:%S")
+        else:
+            gen_dt = self.faker.date_time()
+            if datetime_format:
+                return self._format_dt(gen_dt, datetime_format)
+            else:
+                return gen_dt
 
     @staticmethod
     def generate_int(int_range: Optional[List[int]] = None) -> int:
+        """
+        Random number generator
+        :param int_range: List of ints [min Int, max Int]
+        :return: int
+        """
         if int_range and (len(int_range) != 2 or sorted(int_range) != int_range or None in int_range):
             raise ValueError(f"Please double check the int_range arg and ensure that its length is 2 and "
                              f"in ascending order.")
@@ -85,6 +107,11 @@ class FakerGen:
 
     @staticmethod
     def generate_float(float_range: List[Union[int, float]] = None) -> float:
+        """
+        Random number generator
+        :param float_range: List of floats/ints [min Int/float, max Int/float]
+        :return: float
+        """
         if float_range and (len(float_range) != 2 or sorted(float_range) != float_range or None in float_range):
             raise ValueError(f"Please double check the float_range arg and ensure that its length is 2 and "
                              f"in ascending order.")
@@ -96,6 +123,12 @@ class FakerGen:
 
     @staticmethod
     def _format_dt(dt: datetime, dt_format: str) -> str:
+        """
+        Format datetime to string format
+        :param dt: datetime object
+        :param dt_format: datetime format
+        :return: str
+        """
         try:
             formatted_dt = dt.strftime(dt_format)
             return formatted_dt
