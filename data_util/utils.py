@@ -24,6 +24,5 @@ def get_logger(log_level="info"):
     else:
         log_level = logging.INFO
 
-    logging.basicConfig(level=log_level, format='%(message)s')
+    logging.basicConfig(level=log_level, format="%(message)s")
     return logging.getLogger()
-

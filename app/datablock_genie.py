@@ -8,7 +8,11 @@ from typing import List, Literal, Union
 
 
 class DataBlockGenie:
-    def __init__(self, row_counts: int = 100, log_level: Literal["info", "warning", "debug"] = "info"):
+    def __init__(
+        self,
+        row_counts: int = 100,
+        log_level: Literal["info", "warning", "debug"] = "info",
+    ):
         """
         DataBlockGenie generates Dataframes easily so you don't have to create a dummy configuration for a DF
         :param row_counts: the amount of rows will be generated
@@ -18,6 +22,7 @@ class DataBlockGenie:
         self.data_template = DataTemplate(amount=self.row_counts)
         self.logger = get_logger(log_level)
         self._data_gen = FakerGen()
+        self.version = "v1"
 
     def __repr__(self) -> str:
         columns = self.data_template.columns.keys()
@@ -42,24 +47,32 @@ class DataBlockGenie:
         :param spark_session: Sparksession
         :return: Spark.Dataframe
         """
-        rows, columns = self._generate_data()
+        rows, columns = self._generate_data(self.version)
         df = spark_session.createDataFrame(rows, columns)
         self.logger.debug("Spark DF has been created")
 
         return df
-    
+
     def create_pandas_df(self) -> pd.DataFrame:
         """
         Generate Pandas Dataframe
         :return: pd.Dataframe
         """
-        rows, columns = self._generate_data()
-        df = pd.DataFrame(data=rows, columns=columns)
+        rows, columns = self._generate_data(self.version)
+        if self.version == "v2":
+            df = pd.DataFrame(rows)
+        else:
+            df = pd.DataFrame(data=rows, columns=columns)
         self.logger.debug("Pandas DF has been created")
 
         return df
-    
-    def add_column(self, name: str, category: Literal["datetime", "float", "integer", "name"], **args: str) -> None:
+
+    def add_column(
+        self,
+        name: str,
+        category: Literal["datetime", "float", "integer", "name"],
+        **args: str,
+    ) -> None:
         """
         Add column to object
         :param name: Column Name
@@ -90,24 +103,38 @@ class DataBlockGenie:
             else:
                 self.logger.warning(f'Column "{cols}" was not found')
 
-    def _generate_data(self) -> tuple:
+    def _generate_data(self, version: Literal["v1", "v2"] = "v1") -> tuple:
         """
         This method generates the initial data that will be plugged into pd.Dataframe or spark_session.createDataFrame
         :return: (rows, column_names)
         """
-        amount = self.data_template.amount
+        # amount = self.data_template.amount
 
-        column_names = [column_name for column_name in self.data_template.columns.keys()]
+        column_names = [
+            column_name for column_name in self.data_template.columns.keys()
+        ]
 
-        rows = []
-        for _ in range(amount):
-            row_column = []
+        if version == "v2":
+            all_values = {}
             for column_name, column_arg in self.data_template.columns.items():
                 column_category = column_arg.column_category
                 column_args = column_arg.column_args
 
-                col_value = self._data_gen.get_data(column_category, column_args)
-                row_column.append(col_value)
-            rows.append(row_column)
+                col_values_raw = self._data_gen.get_data_v2(
+                    column_category, self.row_counts, column_args
+                )
+                col_values = list(col_values_raw)
+                all_values[column_name] = col_values
+            return all_values, None
+        else:
+            rows = []
+            for _ in range(self.row_counts):
+                row_column = []
+                for column_name, column_arg in self.data_template.columns.items():
+                    column_category = column_arg.column_category
+                    column_args = column_arg.column_args
 
-        return rows, column_names
+                    col_value = self._data_gen.get_data(column_category, column_args)
+                    row_column.append(col_value)
+                rows.append(row_column)
+            return rows, column_names
