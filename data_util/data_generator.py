@@ -19,6 +19,61 @@ class FakerGen:
     def __init__(self):
         self.faker = Faker()
 
+    def get_data_v2(
+        self,
+        data_category: Literal["datetime", "float", "integer", "name"],
+        row_count: int,
+        column_args: dict = None,
+    ):
+        if data_category == DATETIME:
+            datetime_range = (
+                column_args["datetime_range"]
+                if column_args and "datetime_range" in column_args
+                else None
+            )
+            datetime_format = (
+                column_args["datetime_format"]
+                if column_args and "datetime_format" in column_args
+                else None
+            )
+            for _ in range(row_count):
+                yield self.generate_datetime(
+                    datetime_range=datetime_range, datetime_format=datetime_format
+                )
+        elif data_category == FLOAT:
+            float_range = (
+                column_args["float_range"]
+                if column_args and "float_range" in column_args
+                else None
+            )
+            for _ in range(row_count):
+                yield self.generate_float(float_range=float_range)
+        elif data_category == INTEGER:
+            int_range = (
+                column_args["int_range"]
+                if column_args and "int_range" in column_args
+                else None
+            )
+            for _ in range(row_count):
+                yield self.generate_int(int_range=int_range)
+        elif data_category == NAME:
+            name_type = (
+                column_args["name_type"]
+                if column_args and "name_type" in column_args
+                else None
+            )
+            full_name = (
+                column_args["full_name"]
+                if column_args and "full_name" in column_args
+                else True
+            )
+            for _ in range(row_count):
+                yield self.generate_name(name_type=name_type, full_name=full_name)
+        else:
+            raise ValueError(
+                f'Please specify data_category arg (Literal["datetime", "float", "integer", "name"])'
+            )
+
     def get_data(
         self,
         data_category: Literal["datetime", "float", "integer", "name"],
