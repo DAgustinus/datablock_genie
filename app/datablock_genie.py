@@ -8,7 +8,11 @@ from typing import List, Literal, Union
 
 
 class DataBlockGenie:
-    def __init__(self, row_counts: int = 100, log_level: Literal["info", "warning", "debug"] = "info"):
+    def __init__(
+        self,
+        row_counts: int = 100,
+        log_level: Literal["info", "warning", "debug"] = "info",
+    ):
         """
         DataBlockGenie generates Dataframes easily so you don't have to create a dummy configuration for a DF
         :param row_counts: the amount of rows will be generated
@@ -47,7 +51,7 @@ class DataBlockGenie:
         self.logger.debug("Spark DF has been created")
 
         return df
-    
+
     def create_pandas_df(self) -> pd.DataFrame:
         """
         Generate Pandas Dataframe
@@ -58,8 +62,13 @@ class DataBlockGenie:
         self.logger.debug("Pandas DF has been created")
 
         return df
-    
-    def add_column(self, name: str, category: Literal["datetime", "float", "integer", "name"], **args: str) -> None:
+
+    def add_column(
+        self,
+        name: str,
+        category: Literal["datetime", "float", "integer", "name"],
+        **args: str,
+    ) -> None:
         """
         Add column to object
         :param name: Column Name
@@ -97,7 +106,9 @@ class DataBlockGenie:
         """
         amount = self.data_template.amount
 
-        column_names = [column_name for column_name in self.data_template.columns.keys()]
+        column_names = [
+            column_name for column_name in self.data_template.columns.keys()
+        ]
 
         rows = []
         for _ in range(amount):
