@@ -1,5 +1,5 @@
 *.pyc
 *.ipynb
-.ipynb_checkpoints/*
+datablock_genie/.ipynb_checkpoints/*
 venv/*
 poetry.lock

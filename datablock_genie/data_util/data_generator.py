@@ -1,17 +1,17 @@
 import calendar
 import random
+from datetime import datetime
+from typing import List, Literal, Optional, Union
 
 from faker import Faker
-from typing import Optional, Literal, List, Union
-from datetime import datetime
 
-from resources.constants import (
+from datablock_genie.resources.constants import (
     DATETIME,
     FLOAT,
-    INTEGER,
-    NAME,
     INT_MAX,
     INT_MIN,
+    INTEGER,
+    NAME,
 )
 
 
