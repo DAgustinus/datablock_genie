@@ -1,10 +1,10 @@
-import pandas as pd
-
-from data_util.utils import DataColumn, DataTemplate, get_logger
-from data_util.data_generator import FakerGen
-
-from pyspark.sql import DataFrame, SparkSession
 from typing import List, Literal, Union
+
+import pandas as pd
+from pyspark.sql import DataFrame, SparkSession
+
+from datablock_genie.data_util.data_generator import FakerGen
+from datablock_genie.data_util.utils import DataColumn, DataTemplate, get_logger
 
 
 class DataBlockGenie:
